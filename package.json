@@ -2,6 +2,8 @@
   "name": "portafolio-cripto",
   "private": true,
   "type": "module",
+  "packageManager": "bun@1.2.21",
+  "engines": { "bun": ">=1.1.0" },
   "scripts": {
     "start": "bun run index.ts",
     "check": "bun run scripts/verificar.ts"

@@ -1,0 +1,5 @@
+# Respaldo por si Railway cae al builder viejo: asegura que exista Bun.
+providers = ["bun"]
+
+[start]
+cmd = "bun run index.ts"
