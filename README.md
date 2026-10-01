@@ -16,6 +16,10 @@ Un solo archivo (`index.ts`) que corre con Bun y se sirve en Railway.
 - **Acceso:** PIN en la variable `PORTAFOLIO_PIN`. El servidor valida el PIN,
   responde con una cookie firmada (HttpOnly, Secure) y **todas** las rutas de
   `/api/*` exigen esa cookie. La pagina no trae ningun dato embebido.
+- **Limite de intentos:** 5 fallos desde la misma IP bloquean el login 10
+  minutos (HTTP 429). El conteo vive en memoria, asi que un reinicio lo limpia.
+- **Sesion:** la cookie dura 30 dias y se renueva en cada carga del portafolio,
+  asi que mientras lo uses no te saca. "Cerrar sesion" la borra al instante.
 - **Precios:** CoinGecko para cripto (CoinPaprika de respaldo) y Yahoo Finance
   para acciones. Velas de Binance, con MEXC y Yahoo de respaldo.
 

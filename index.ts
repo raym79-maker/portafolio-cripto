@@ -380,7 +380,35 @@ function portAuthed(req: Request): boolean {
   const m = c.match(/(?:^|;\s*)pf=([a-f0-9]+)/);
   return !!m && m[1] === PORT_TOKEN;
 }
-const PORT_COOKIE = "pf=" + PORT_TOKEN + "; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=31536000";
+const PORT_DIAS = 30;
+const PORT_COOKIE = "pf=" + PORT_TOKEN + "; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=" + (PORT_DIAS * 86400);
+
+// Limite de intentos por IP. Vive en memoria: si el contenedor reinicia se
+// reinicia el conteo, que para un solo usuario es suficiente.
+const INTENTOS = new Map<string, { n: number; hasta: number }>();
+const MAX_INTENTOS = 5;
+const CASTIGO_MS = 10 * 60_000;
+
+function quien(req: Request): string {
+  const h = req.headers.get("x-forwarded-for") || "";
+  return (h.split(",")[0] || "desconocido").trim();
+}
+
+function bloqueadoPor(ip: string): number {
+  const e = INTENTOS.get(ip);
+  if (!e) return 0;
+  if (e.hasta > Date.now()) return Math.ceil((e.hasta - Date.now()) / 1000);
+  if (e.hasta) INTENTOS.delete(ip);
+  return 0;
+}
+
+function fallo(ip: string) {
+  const e = INTENTOS.get(ip) || { n: 0, hasta: 0 };
+  e.n++;
+  if (e.n >= MAX_INTENTOS) { e.hasta = Date.now() + CASTIGO_MS; e.n = 0; }
+  INTENTOS.set(ip, e);
+  if (INTENTOS.size > 500) for (const [k, v] of INTENTOS) { if (v.hasta < Date.now()) INTENTOS.delete(k); }
+}
 const PAGE = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -781,7 +809,15 @@ function pfLogin(){
     .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
     .then(function(res){
       $("pf-entrar").disabled = false;
-      if (!res.ok){ $("pf-err").textContent = res.j.error === "sin_pin" ? "El servidor no tiene PIN configurado." : "PIN incorrecto."; $("pf-pin").value = ""; return; }
+      if (!res.ok){
+        var e = res.j.error, m = "PIN incorrecto.";
+        if (e === "sin_pin") m = "El servidor no tiene PIN configurado.";
+        else if (e === "demasiados_intentos"){
+          var seg = res.j.segundos || 600;
+          m = "Demasiados intentos. Espera " + Math.ceil(seg / 60) + " minutos.";
+        }
+        $("pf-err").textContent = m; $("pf-pin").value = ""; return;
+      }
       $("pf-pin").value = ""; pf.auth = true; pfShow(); pfLoad();
     })
     .catch(function(){ $("pf-entrar").disabled = false; $("pf-err").textContent = "Sin conexion."; });
@@ -1742,10 +1778,19 @@ Bun.serve({
     const url = new URL(req.url);
     if (url.pathname === "/api/portafolio/login" && req.method === "POST") {
       if (!PORT_PIN) return json({ error: "sin_pin" }, 503);
+      const ip = quien(req);
+      const espera = bloqueadoPor(ip);
+      if (espera) return json({ error: "demasiados_intentos", segundos: espera }, 429);
       let pin = "";
       try { pin = String(((await req.json()) as any).pin || "").trim(); } catch {}
       await Bun.sleep(400);
-      if (pin !== PORT_PIN) return json({ error: "pin_invalido" }, 401);
+      if (pin !== PORT_PIN) {
+        fallo(ip);
+        const quedan = bloqueadoPor(ip);
+        if (quedan) return json({ error: "demasiados_intentos", segundos: quedan }, 429);
+        return json({ error: "pin_invalido" }, 401);
+      }
+      INTENTOS.delete(ip);
       return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "set-cookie": PORT_COOKIE } });
     }
     if (url.pathname === "/api/portafolio/salir" && req.method === "POST") {
@@ -1776,7 +1821,9 @@ Bun.serve({
       try { px = await portPrices(st.pos); } catch (e: any) { console.error("portafolio precios", e.message); }
       let snap: any[] = st.snap || [];
       try { snap = await portSnap(st, px); } catch (e: any) { console.error("portafolio foto", e.message); }
-      return json({ pos: st.pos, mov: st.mov, precios: px, snap, updated: Date.now() });
+      // renueva la sesion mientras sigas usando el portafolio
+      return new Response(JSON.stringify({ pos: st.pos, mov: st.mov, precios: px, snap, updated: Date.now() }),
+        { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "set-cookie": PORT_COOKIE } });
     }
     if (url.pathname === "/api/portafolio/precio") {
       if (!portAuthed(req)) return json({ error: "no_autorizado" }, 401);

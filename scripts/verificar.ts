@@ -19,10 +19,9 @@ try {
   process.exit(1);
 }
 
-// El arranque de Railway lleva el archivo completo; pasado el limite el
-// contenedor no levanta ("Argument list too long").
+// Informativo. El limite de ~98 KB solo existia cuando esto era un Railway
+// Function y el codigo viajaba dentro del comando de arranque. Desde el repo
+// se compila una imagen y el tamano ya no importa.
 const bytes = new TextEncoder().encode(src).length;
 console.log("script del navegador: OK");
-console.log("tamano del archivo:", bytes, "bytes");
-if (bytes > 98000) { console.error("DEMASIADO GRANDE: por arriba de ~98 KB Railway no arranca"); process.exit(1); }
-console.log("margen contra el limite:", 98000 - bytes, "bytes");
+console.log("tamano del archivo:", (bytes / 1024).toFixed(1), "KB");
