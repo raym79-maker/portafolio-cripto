@@ -1,0 +1,9 @@
+{
+  "name": "portafolio-cripto",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun run index.ts",
+    "check": "bun run scripts/verificar.ts"
+  }
+}
