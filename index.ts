@@ -656,7 +656,8 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
   border:1px solid var(--rule);background:var(--panel);color:var(--ink)}
 /* ---------- compacta: densidad. fuerte: color mas marcado ---------- */
 .ptable.compacta tbody tr{font-size:13px;padding:9px 11px}
-.ptable.compacta td{padding:1px 0;gap:10px}
+.ptable.compacta td{padding:1px 0;gap:8px;min-width:0}
+.ptable.compacta:not(.tabla) td::before{flex:0 1 auto;overflow:hidden;text-overflow:ellipsis}
 .ptable.compacta td::before{font-size:11.5px}
 .ptable.compacta td.cab{font-size:14.5px;margin-bottom:3px}
 .ptable.compacta .pact{margin-top:6px;gap:5px}
@@ -677,7 +678,13 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
 @media (min-width: 761px){
   .ptable.compacta:not(.tabla) tbody{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:9px}
   .ptable.compacta:not(.tabla) tbody tr{padding:10px 13px;border-radius:10px;
-    display:grid;grid-template-columns:1fr 1fr;gap:0 16px;align-content:start}
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 14px;align-content:start}
+  .ptable.compacta:not(.tabla) tbody tr > td{min-width:0}
+  /* en media tarjeta la barrita no cabe junto a la etiqueta y el monto;
+     en movil la fila es completa y ahi si se queda */
+  .ptable.compacta:not(.tabla) .peso .bar{display:none}
+  .ptable.compacta:not(.tabla) .peso{gap:0;margin-left:6px}
+  .ptable.compacta:not(.tabla) .peso small{min-width:0}
   .ptable.compacta:not(.tabla) tbody tr > td.cab,
   .ptable.compacta:not(.tabla) tbody tr > td:last-child{grid-column:1 / -1}
   .ptable.abiertas.compacta:not(.tabla) tbody tr > td[data-l="PNL"]{grid-column:1 / -1}
