@@ -433,6 +433,7 @@ const PAGE = `<!DOCTYPE html>
   --up:#16704A; --upbg:#DDEFE5; --down:#B3302A; --downbg:#F6E0DE;
   --ath:#B8780A; --athbg:#F5E9CF; --track:#DCE1E6;
   --e20:#2F6FB0; --e50:#8A5CB8;
+  --posbg:#E9F5EE; --posln:#BFDECB; --negbg:#FBEBE8; --negln:#EFC9C3;
 }
 @media (prefers-color-scheme: dark){
   :root{
@@ -440,6 +441,7 @@ const PAGE = `<!DOCTYPE html>
     --up:#4CC48A; --upbg:#173127; --down:#F07A70; --downbg:#3A1F1F;
     --ath:#E8B24A; --athbg:#3A2F17; --track:#26313D;
     --e20:#6FA8E0; --e50:#B891E0;
+    --posbg:#15261E; --posln:#244534; --negbg:#2C1B19; --negln:#4A2B27;
   }
 }
 *,*::before,*::after{box-sizing:inherit}
@@ -583,31 +585,73 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
 .btcbar .px{font-family:Archivo,sans-serif;font-stretch:85%;font-weight:700;font-size:20px}
 .btcbar .k{color:var(--soft);margin-right:5px}
 .btcbar a{margin-left:auto;font-size:12.5px;color:var(--soft)}
+/* ---------- tarjetas: el modo por defecto en cualquier pantalla ---------- */
+.ptable{overflow-x:visible}
+.ptable table{min-width:0;display:block}
+.ptable thead{display:none}
+.ptable tbody,.ptable tfoot{display:block}
+.ptable tr{display:block;padding:11px 13px;border-bottom:1px solid var(--rule)}
+.ptable tbody tr:last-child{border-bottom:0}
+.ptable td{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  padding:3px 0;border-bottom:0;text-align:right;white-space:normal}
+.ptable td:empty{display:none}
+.ptable td::before{content:attr(data-l);color:var(--soft);font-size:12.5px;
+  text-align:left;flex:0 0 auto;white-space:nowrap}
+.ptable td[data-l=""]::before,.ptable td:not([data-l])::before{content:none}
+.ptable td.cab{display:block;text-align:left;margin-bottom:5px;font-size:16px}
+.ptable td.cab::before{content:none}
+.ptable .pact{justify-content:flex-start;margin-top:8px}
+.ptable .peso{margin-top:0}
+.ptable tfoot td{border-top:0;padding:3px 0}
+.ptable tfoot tr{border-top:2px solid var(--rule);background:var(--panel)}
+/* verde muy claro en ganancia, rojo claro en perdida */
+.ptable tbody tr.pos{background:var(--posbg)}
+.ptable tbody tr.neg{background:var(--negbg)}
+
+@media (min-width: 761px){
+  /* en pantalla ancha las tarjetas se acomodan en rejilla */
+  .ptable:not(.tabla){background:transparent;border:0;border-radius:0}
+  .ptable:not(.tabla) tbody{display:grid;gap:12px;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+  .ptable:not(.tabla) tbody tr{border:1px solid var(--rule);border-radius:12px;
+    background:var(--panel);padding:13px 15px}
+  .ptable:not(.tabla) tbody tr.pos{border-color:var(--posln);background:var(--posbg)}
+  .ptable:not(.tabla) tbody tr.neg{border-color:var(--negln);background:var(--negbg)}
+  .ptable:not(.tabla) tbody tr:last-child{border-bottom:1px solid var(--rule)}
+  .ptable:not(.tabla) tbody tr.pos:last-child{border-bottom-color:var(--posln)}
+  .ptable:not(.tabla) tbody tr.neg:last-child{border-bottom-color:var(--negln)}
+  .ptable:not(.tabla) tfoot tr{margin-top:12px;border:1px solid var(--rule);
+    border-radius:12px;padding:13px 15px}
+  .ptable:not(.tabla) td.cab{font-size:17px}
+  .ptable:not(.tabla) tbody tr:empty{display:none}
+
+  /* modo tabla, el de siempre */
+  .ptable.tabla table{display:table;min-width:900px}
+  .ptable.tabla thead{display:table-header-group}
+  .ptable.tabla tbody{display:table-row-group}
+  .ptable.tabla tfoot{display:table-footer-group}
+  .ptable.tabla tr{display:table-row;padding:0}
+  .ptable.tabla td{display:table-cell;padding:9px 12px;text-align:right;
+    white-space:nowrap;border-bottom:1px solid var(--rule)}
+  .ptable.tabla tbody tr:last-child td{border-bottom:0}
+  .ptable.tabla td::before{content:none}
+  .ptable.tabla td.cab{display:table-cell;margin:0;font-size:inherit;text-align:left}
+  .ptable.tabla .pact{justify-content:flex-end;margin-top:0}
+  .ptable.tabla .peso{margin-top:4px}
+  .ptable.tabla tfoot td{border-top:2px solid var(--rule);padding:11px 12px}
+  .ptable.tabla tfoot tr{margin:0;border:0;border-radius:0;padding:0}
+}
+
 @media (max-width: 760px){
   .wrap{padding:18px 13px 40px}
   body{font-size:15.5px}
-  .ptable{overflow-x:visible}
-  .ptable table{min-width:0;display:block}
-  .ptable thead{display:none}
-  .ptable tbody,.ptable tfoot{display:block}
-  .ptable tr{display:block;padding:11px 13px;border-bottom:1px solid var(--rule)}
-  .ptable tbody tr:last-child{border-bottom:0}
-  .ptable td{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
-    padding:3px 0;border-bottom:0;text-align:right;white-space:normal}
-  .ptable td:empty{display:none}
-  .ptable td::before{content:attr(data-l);color:var(--soft);font-size:12.5px;
-    text-align:left;flex:0 0 auto;white-space:nowrap}
-  .ptable td[data-l=""]::before,.ptable td:not([data-l])::before{content:none}
-  .ptable td.cab{display:block;text-align:left;margin-bottom:5px;font-size:16px}
-  .ptable td.cab::before{content:none}
-  .ptable .pact{justify-content:flex-start;margin-top:8px}
-  .ptable .peso{margin-top:0}
-  .ptable tfoot td{border-top:0;padding:3px 0}
-  .ptable tfoot tr{border-top:2px solid var(--rule);background:var(--panel)}
   .movtable table{min-width:0}
   .movtable td,.movtable th{padding:8px 9px;font-size:13px}
   .tiles{grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}
+  .filtros .solo-ancho{display:none}
 }
+.filtros select{font:inherit;font-size:12.5px;padding:5px 9px;border-radius:8px;
+  border:1px solid var(--rule);background:var(--panel);color:var(--ink)}
 </style>
 </head>
 <body>
@@ -690,6 +734,15 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
           <button class="ghost" data-f="compra" aria-pressed="false">Zona de compra</button>
           <button class="ghost" data-f="retro" aria-pressed="false">Esperar retroceso</button>
           <button class="ghost" id="pf-agrupar" aria-pressed="false" title="Junta las compras del mismo activo en un solo renglon">Agrupar por activo</button>
+          <select id="pf-orden" aria-label="Ordenar las posiciones">
+            <option value="pct">Mayor % de ganancia</option>
+            <option value="pnl">Mayor PNL en dolares</option>
+            <option value="inversion">Mayor inversion</option>
+            <option value="valor">Mayor valor de mercado</option>
+            <option value="fecha">Mas reciente</option>
+            <option value="s">Activo (A-Z)</option>
+          </select>
+          <button class="ghost solo-ancho" id="pf-vista" aria-pressed="false" title="Cambia entre tarjetas y tabla">Ver como tabla</button>
           <span class="cnt" id="pf-cnt"></span>
         </div>
         <div class="tablebox ptable">
@@ -793,7 +846,18 @@ function fmtPct(p){
 function fmtDate(iso){ try { return new Date(iso + "T12:00:00").toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"numeric"}); } catch(e){ return iso || ""; } }
 
 var pf = { auth:false, pos:[], mov:[], px:{}, edit:null, medit:null, loading:false, pxForm:null, pxTimer:null, graf:null, grafTipo:"cripto", gtf:"1d", velas:null, sig:{},
-  ordAb:{k:"pct",dir:-1}, ordCe:{k:"fecha",dir:-1}, filtro:"all", agrupar:false, snap:[] };
+  ordAb:{k:"pct",dir:-1}, ordCe:{k:"fecha",dir:-1}, filtro:"all", agrupar:false, snap:[], vista:"tarjetas" };
+
+try { var vg = localStorage.getItem("pf-vista"); if (vg === "tabla" || vg === "tarjetas") pf.vista = vg; } catch(e){}
+
+function pfVistaAplica(){
+  var tabla = pf.vista === "tabla";
+  document.querySelectorAll(".ptable").forEach(function(x){ x.classList.toggle("tabla", tabla); });
+  var b = $("pf-vista");
+  if (b){ b.textContent = tabla ? "Ver como tarjetas" : "Ver como tabla"; b.setAttribute("aria-pressed", tabla ? "true" : "false"); }
+  var sel = $("pf-orden");
+  if (sel) sel.value = pf.ordAb.k;
+}
 
 var PF_TOL = 1;
 function pfMsg(t){ $("pf-msg").textContent = t || ""; }
@@ -1037,7 +1101,10 @@ function pfRender(){
 
   pfMov(caja, invAb, valAb, pnlCe);
 
-  $("pf-sub-ab").textContent = ab.length ? "Toca un encabezado para ordenar. La barrita bajo cada inversion es su peso en tu capital; la etiqueta junto al activo es la senal del tablero y el simbolo abre sus velas." : "Todavia no hay posiciones abiertas.";
+  $("pf-sub-ab").textContent = ab.length
+    ? (pf.vista === "tabla" ? "Toca un encabezado para ordenar. " : "Verde claro: la posicion va ganando; rojo claro: va perdiendo. ") +
+      "La barrita bajo cada inversion es su peso en tu capital; la etiqueta junto al activo es la senal del tablero y el simbolo abre sus velas."
+    : "Todavia no hay posiciones abiertas.";
 
   pfAlerta(ab);
   pfTablaAb(ab);
@@ -1214,7 +1281,8 @@ function pfTablaAb(ab){
     '<td data-l="%">' + (hayPx && tInv ? fmtPct(tPnl / tInv) : '<span class="muted">—</span>') + '</td><td></td></tr>' : "";
 
   $("pf-rows-ab").innerHTML = filas.length ? filas.map(function(f){
-    return '<tr><td class="cab" style="text-align:left"><b class="sym" data-graf="' + esc(f.s) + '" data-gt="' + esc(f.tipo) + '">' + esc(f.s) + '</b>' + sgPill(f.s) +
+    var tono = f.pnl == null ? "" : (f.pnl > 0 ? " pos" : f.pnl < 0 ? " neg" : "");
+    return '<tr class="' + tono.trim() + '"><td class="cab" style="text-align:left"><b class="sym" data-graf="' + esc(f.s) + '" data-gt="' + esc(f.tipo) + '">' + esc(f.s) + '</b>' + sgPill(f.s) +
       (f.n > 1 ? '<span class="agr">' + f.n + ' compras</span>' : '') +
       (f.tipo === "accion" ? ' <span class="muted">accion</span>' : '') + '</td>' +
       '<td data-l="Fecha">' + fmtDate(f.fecha) + '</td>' +
@@ -1275,7 +1343,8 @@ function pfTablaCe(ce){
     '<td data-l="%">' + (cInv ? fmtPct(cPnl / cInv) : '<span class="muted">—</span>') + '</td><td></td><td></td><td></td></tr>' : "";
 
   $("pf-rows-ce").innerHTML = filas.length ? filas.map(function(f){
-    return '<tr><td class="cab" style="text-align:left"><b class="sym" data-graf="' + esc(f.s) + '" data-gt="' + esc(f.tipo) + '">' + esc(f.s) + '</b>' + sgPill(f.s) +
+    var tono = f.pnl > 0 ? " pos" : f.pnl < 0 ? " neg" : "";
+    return '<tr class="' + tono.trim() + '"><td class="cab" style="text-align:left"><b class="sym" data-graf="' + esc(f.s) + '" data-gt="' + esc(f.tipo) + '">' + esc(f.s) + '</b>' + sgPill(f.s) +
       (f.n > 1 ? '<span class="agr">' + f.n + ' ops</span>' : '') + '</td>' +
       '<td data-l="Fecha de venta">' + fmtDate(f.fecha) + '</td>' +
       '<td data-l="Inversion">' + pfUsd(f.inversion) + '</td>' +
@@ -1745,8 +1814,21 @@ function pfOrdClick(e, ord){
   var k = b.getAttribute("data-k");
   if (ord.k === k) ord.dir *= -1;
   else { ord.k = k; ord.dir = (k === "s" || k === "fecha") ? 1 : -1; }
+  var sel = $("pf-orden");
+  if (sel && ord === pf.ordAb) sel.value = ord.k;
   pfRender();
 }
+$("pf-orden").addEventListener("change", function(){
+  var k = this.value;
+  pf.ordAb.k = k;
+  pf.ordAb.dir = (k === "s") ? 1 : -1;
+  pfRender();
+});
+$("pf-vista").addEventListener("click", function(){
+  pf.vista = pf.vista === "tabla" ? "tarjetas" : "tabla";
+  try { localStorage.setItem("pf-vista", pf.vista); } catch(e){}
+  pfVistaAplica();
+});
 $("pf-th-ab").addEventListener("click", function(e){ pfOrdClick(e, pf.ordAb); });
 $("pf-th-ce").addEventListener("click", function(e){ pfOrdClick(e, pf.ordCe); });
 $("pf-filtros").addEventListener("click", function(e){
@@ -1765,6 +1847,7 @@ $("pf-filtros").addEventListener("click", function(e){
 });
 setInterval(function(){ if (!document.hidden && pf.auth) pfLoad(); }, 60000);
 document.addEventListener("visibilitychange", function(){ if (!document.hidden && pf.auth) pfLoad(); });
+pfVistaAplica();
 pfLoad();
 
 </script>
