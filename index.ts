@@ -664,6 +664,16 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
 .ptable.compacta .sg{font-size:9.5px;padding:1px 6px}
 .ptable.compacta tbody tr.pos{background:var(--posbg2)}
 .ptable.compacta tbody tr.neg{background:var(--negbg2)}
+/* abiertas: franja de color al costado y el PNL resaltado */
+.ptable.abiertas tbody tr{border-left:5px solid transparent}
+.ptable.abiertas tbody tr.pos{border-left-color:var(--up)}
+.ptable.abiertas tbody tr.neg{border-left-color:var(--down)}
+.ptable.abiertas:not(.tabla) td[data-l="PNL"]{align-items:center;margin-top:2px}
+.ptable.abiertas:not(.tabla) td[data-l="PNL"]::before{font-weight:600;color:var(--ink)}
+.ptable.abiertas:not(.tabla) td[data-l="PNL"] .chg{font-size:15.5px;padding:3px 11px;
+  border-radius:999px;font-weight:700}
+.ptable.abiertas:not(.tabla) td[data-l="PNL"] .chg.up{background:var(--upbg);color:var(--up)}
+.ptable.abiertas:not(.tabla) td[data-l="PNL"] .chg.down{background:var(--downbg);color:var(--down)}
 @media (min-width: 761px){
   .ptable.compacta:not(.tabla) tbody{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:9px}
   .ptable.compacta:not(.tabla) tbody tr{padding:10px 13px;border-radius:10px;
@@ -769,7 +779,7 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
           <button class="ghost solo-ancho" id="pf-vista" aria-pressed="false" title="Cambia entre tarjetas y tabla">Ver como tabla</button>
           <span class="cnt" id="pf-cnt"></span>
         </div>
-        <div class="tablebox ptable">
+        <div class="tablebox ptable abiertas">
           <table>
             <thead><tr id="pf-th-ab">
               <th class="s"><button class="sb" data-k="s">Activo</button></th>
