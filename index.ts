@@ -654,7 +654,7 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
 }
 .filtros select{font:inherit;font-size:12.5px;padding:5px 9px;border-radius:8px;
   border:1px solid var(--rule);background:var(--panel);color:var(--ink)}
-/* ---------- cerradas: mas apretadas y con color mas marcado ---------- */
+/* ---------- compacta: densidad. fuerte: color mas marcado ---------- */
 .ptable.compacta tbody tr{font-size:13px;padding:9px 11px}
 .ptable.compacta td{padding:1px 0;gap:10px}
 .ptable.compacta td::before{font-size:11.5px}
@@ -662,8 +662,8 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
 .ptable.compacta .pact{margin-top:6px;gap:5px}
 .ptable.compacta .pact button{padding:3px 8px;font-size:11.5px}
 .ptable.compacta .sg{font-size:9.5px;padding:1px 6px}
-.ptable.compacta tbody tr.pos{background:var(--posbg2)}
-.ptable.compacta tbody tr.neg{background:var(--negbg2)}
+.ptable.fuerte tbody tr.pos{background:var(--posbg2)}
+.ptable.fuerte tbody tr.neg{background:var(--negbg2)}
 /* abiertas: franja de color al costado y el PNL resaltado */
 .ptable.abiertas tbody tr{border-left:5px solid transparent}
 .ptable.abiertas tbody tr.pos{border-left-color:var(--up)}
@@ -680,11 +680,12 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
     display:grid;grid-template-columns:1fr 1fr;gap:0 16px;align-content:start}
   .ptable.compacta:not(.tabla) tbody tr > td.cab,
   .ptable.compacta:not(.tabla) tbody tr > td:last-child{grid-column:1 / -1}
-  .ptable.compacta:not(.tabla) tbody tr.pos{border-color:var(--posln2);background:var(--posbg2)}
-  .ptable.compacta:not(.tabla) tbody tr.neg{border-color:var(--negln2);background:var(--negbg2)}
+  .ptable.abiertas.compacta:not(.tabla) tbody tr > td[data-l="PNL"]{grid-column:1 / -1}
+  .ptable.fuerte:not(.tabla) tbody tr.pos{border-color:var(--posln2);background:var(--posbg2)}
+  .ptable.fuerte:not(.tabla) tbody tr.neg{border-color:var(--negln2);background:var(--negbg2)}
   .ptable.compacta:not(.tabla) td.cab{font-size:15px}
-  .ptable.compacta.tabla tbody tr.pos{background:var(--posbg2)}
-  .ptable.compacta.tabla tbody tr.neg{background:var(--negbg2)}
+  .ptable.fuerte.tabla tbody tr.pos{background:var(--posbg2)}
+  .ptable.fuerte.tabla tbody tr.neg{background:var(--negbg2)}
 }
 </style>
 </head>
@@ -779,7 +780,7 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
           <button class="ghost solo-ancho" id="pf-vista" aria-pressed="false" title="Cambia entre tarjetas y tabla">Ver como tabla</button>
           <span class="cnt" id="pf-cnt"></span>
         </div>
-        <div class="tablebox ptable abiertas">
+        <div class="tablebox ptable abiertas compacta">
           <table>
             <thead><tr id="pf-th-ab">
               <th class="s"><button class="sb" data-k="s">Activo</button></th>
@@ -802,7 +803,7 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
       <section class="psec">
         <h2>Posiciones cerradas</h2>
         <p class="rsub">Ordenadas de mayor a menor ganancia. "Mercado vs. tu venta" compara el precio actual del mercado contra el precio al que vendiste: en verde si el mercado retrocedio (vendiste bien), en rojo si siguio subiendo sin ti.</p>
-        <div class="tablebox ptable compacta">
+        <div class="tablebox ptable cerradas compacta fuerte">
           <table>
             <thead><tr id="pf-th-ce">
               <th class="s"><button class="sb" data-k="s">Activo</button></th>
