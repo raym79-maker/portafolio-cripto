@@ -434,6 +434,7 @@ const PAGE = `<!DOCTYPE html>
   --ath:#B8780A; --athbg:#F5E9CF; --track:#DCE1E6;
   --e20:#2F6FB0; --e50:#8A5CB8;
   --posbg:#E9F5EE; --posln:#BFDECB; --negbg:#FBEBE8; --negln:#EFC9C3;
+  --posbg2:#CDEADA; --posln2:#8FC9AC; --negbg2:#F7D5CF; --negln2:#E0A49A;
 }
 @media (prefers-color-scheme: dark){
   :root{
@@ -442,6 +443,7 @@ const PAGE = `<!DOCTYPE html>
     --ath:#E8B24A; --athbg:#3A2F17; --track:#26313D;
     --e20:#6FA8E0; --e50:#B891E0;
     --posbg:#15261E; --posln:#244534; --negbg:#2C1B19; --negln:#4A2B27;
+    --posbg2:#1D3B2C; --posln2:#2F6349; --negbg2:#422422; --negln2:#6B3A34;
   }
 }
 *,*::before,*::after{box-sizing:inherit}
@@ -652,6 +654,28 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
 }
 .filtros select{font:inherit;font-size:12.5px;padding:5px 9px;border-radius:8px;
   border:1px solid var(--rule);background:var(--panel);color:var(--ink)}
+/* ---------- cerradas: mas apretadas y con color mas marcado ---------- */
+.ptable.compacta tbody tr{font-size:13px;padding:9px 11px}
+.ptable.compacta td{padding:1px 0;gap:10px}
+.ptable.compacta td::before{font-size:11.5px}
+.ptable.compacta td.cab{font-size:14.5px;margin-bottom:3px}
+.ptable.compacta .pact{margin-top:6px;gap:5px}
+.ptable.compacta .pact button{padding:3px 8px;font-size:11.5px}
+.ptable.compacta .sg{font-size:9.5px;padding:1px 6px}
+.ptable.compacta tbody tr.pos{background:var(--posbg2)}
+.ptable.compacta tbody tr.neg{background:var(--negbg2)}
+@media (min-width: 761px){
+  .ptable.compacta:not(.tabla) tbody{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:9px}
+  .ptable.compacta:not(.tabla) tbody tr{padding:10px 13px;border-radius:10px;
+    display:grid;grid-template-columns:1fr 1fr;gap:0 16px;align-content:start}
+  .ptable.compacta:not(.tabla) tbody tr > td.cab,
+  .ptable.compacta:not(.tabla) tbody tr > td:last-child{grid-column:1 / -1}
+  .ptable.compacta:not(.tabla) tbody tr.pos{border-color:var(--posln2);background:var(--posbg2)}
+  .ptable.compacta:not(.tabla) tbody tr.neg{border-color:var(--negln2);background:var(--negbg2)}
+  .ptable.compacta:not(.tabla) td.cab{font-size:15px}
+  .ptable.compacta.tabla tbody tr.pos{background:var(--posbg2)}
+  .ptable.compacta.tabla tbody tr.neg{background:var(--negbg2)}
+}
 </style>
 </head>
 <body>
@@ -767,8 +791,8 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
 
       <section class="psec">
         <h2>Posiciones cerradas</h2>
-        <p class="rsub">"Mercado vs. tu venta" compara el precio actual del mercado contra el precio al que vendiste: en verde si el mercado retrocedio (vendiste bien), en rojo si siguio subiendo sin ti.</p>
-        <div class="tablebox ptable">
+        <p class="rsub">Ordenadas de mayor a menor ganancia. "Mercado vs. tu venta" compara el precio actual del mercado contra el precio al que vendiste: en verde si el mercado retrocedio (vendiste bien), en rojo si siguio subiendo sin ti.</p>
+        <div class="tablebox ptable compacta">
           <table>
             <thead><tr id="pf-th-ce">
               <th class="s"><button class="sb" data-k="s">Activo</button></th>
@@ -846,7 +870,7 @@ function fmtPct(p){
 function fmtDate(iso){ try { return new Date(iso + "T12:00:00").toLocaleDateString("es-MX",{day:"numeric",month:"short",year:"numeric"}); } catch(e){ return iso || ""; } }
 
 var pf = { auth:false, pos:[], mov:[], px:{}, edit:null, medit:null, loading:false, pxForm:null, pxTimer:null, graf:null, grafTipo:"cripto", gtf:"1d", velas:null, sig:{},
-  ordAb:{k:"pct",dir:-1}, ordCe:{k:"fecha",dir:-1}, filtro:"all", agrupar:false, snap:[], vista:"tarjetas" };
+  ordAb:{k:"pct",dir:-1}, ordCe:{k:"pnl",dir:-1}, filtro:"all", agrupar:false, snap:[], vista:"tarjetas" };
 
 try { var vg = localStorage.getItem("pf-vista"); if (vg === "tabla" || vg === "tarjetas") pf.vista = vg; } catch(e){}
 
