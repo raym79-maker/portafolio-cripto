@@ -654,6 +654,15 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
 }
 .filtros select{font:inherit;font-size:12.5px;padding:5px 9px;border-radius:8px;
   border:1px solid var(--rule);background:var(--panel);color:var(--ink)}
+.ctit{margin:0 0 12px;font-weight:700;font-size:15px}
+#c-resumen{margin:12px 0 0;font-size:13.5px}
+#c-resumen .caja{border:1px solid var(--rule);border-radius:10px;padding:11px 14px;background:var(--bg)}
+#c-resumen .caja.pos{border-color:var(--posln2);background:var(--posbg2)}
+#c-resumen .caja.neg{border-color:var(--negln2);background:var(--negbg2)}
+#c-resumen .ren{display:flex;justify-content:space-between;gap:16px;padding:2px 0;
+  font-variant-numeric:tabular-nums}
+#c-resumen .ren b{font-weight:700}
+#c-resumen .avi{margin-top:7px;color:var(--soft);font-size:12.5px}
 /* ---------- compacta: densidad. fuerte: color mas marcado ---------- */
 .ptable.compacta tbody tr{font-size:13px;padding:9px 11px}
 .ptable.compacta td{padding:1px 0;gap:8px;min-width:0}
@@ -760,6 +769,20 @@ tfoot .lbl{text-align:left;font-weight:600;color:var(--soft);font-size:12.5px}
         <div class="frow">
           <button id="m-guardar">Guardar</button>
           <button class="ghost" id="m-cancelar">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="form" id="pf-cform">
+        <p class="ctit" id="c-tit">Cerrar posicion</p>
+        <div class="grid">
+          <div><label for="c-cant">Cantidad a vender</label><input id="c-cant" type="number" step="any" inputmode="decimal"><div class="pxhint" id="c-tengo"></div></div>
+          <div><label for="c-precio">Precio de venta</label><input id="c-precio" type="number" step="any" inputmode="decimal"><div class="pxhint" id="c-px"></div></div>
+          <div><label for="c-fecha">Fecha de venta</label><input id="c-fecha" type="date"></div>
+        </div>
+        <div id="c-resumen"></div>
+        <div class="frow">
+          <button id="c-guardar">Confirmar venta</button>
+          <button class="ghost" id="c-cancelar">Cancelar</button>
         </div>
       </div>
 
@@ -1088,20 +1111,88 @@ function pfFormSave(){
 function pfCerrar(id){
   var r = pf.pos.find(function(x){ return x.id === id; });
   if (!r) return;
+  pf.cerrando = id;
+  pfFormHide(); pfMFormHide();
+  $("c-tit").textContent = "Cerrar " + r.s + " — tienes " + pfExacto(r.cantidad) + " por " + pfUsd(r.inversion);
+  $("c-cant").value = r.cantidad;
+  $("c-cant").max = r.cantidad;
+  $("c-fecha").value = new Date().toISOString().slice(0,10);
   var p = pfPx(r);
-  var v = prompt("Precio de venta de " + r.s + ":", p != null ? String(p) : "");
-  if (v === null) return;
-  var n = parseFloat(v);
-  if (!isFinite(n) || n <= 0){ pfMsg("Precio de venta invalido."); return; }
-  var pnl = r.cantidad * n - r.inversion;
-  if (!confirm("Cerrar " + r.s + " a " + fmtPrice(n) + "?\\n\\n" +
-      "Invertiste " + pfUsd(r.inversion) + " y recibes " + pfUsd(r.cantidad * n) + ".\\n" +
-      "Resultado: " + (pnl >= 0 ? "+" : "−") + pfUsd(Math.abs(pnl)) +
-      " (" + pctText(pnl / r.inversion) + ").")) return;
-  var rows = pf.pos.map(function(x){
-    if (x.id !== id) return x;
-    var y = Object.assign({}, x); y.estado = "cerrada"; y.cierre = n; y.fechaCierre = new Date().toISOString().slice(0,10); return y;
-  });
+  $("c-precio").value = p != null ? p : "";
+  $("c-tengo").innerHTML = 'Tienes <b>' + pfExacto(r.cantidad) + '</b> <button type="button" class="ghost" id="c-todo">Vender todo</button>';
+  $("c-px").innerHTML = p == null ? "" : 'Mercado ahora: <b>' + fmtPrice(p) + '</b> <button type="button" class="ghost" id="c-usar">Usar</button>';
+  pfCResumen();
+  $("pf-cform").classList.add("show");
+  $("pf-cform").scrollIntoView({block:"nearest", behavior:"smooth"});
+  $("c-precio").focus();
+}
+
+function pfCFormHide(){ $("pf-cform").classList.remove("show"); pf.cerrando = null; }
+
+// Lo que se vende se lleva su parte proporcional del costo; el resto sigue abierto.
+function pfCVenta(){
+  var r = pf.pos.find(function(x){ return x.id === pf.cerrando; });
+  if (!r) return null;
+  var q = parseFloat($("c-cant").value), v = parseFloat($("c-precio").value);
+  if (!isFinite(q) || q <= 0) return { r: r, error: "Pon cuantas unidades vas a vender." };
+  if (q > r.cantidad * 1.0000001) return { r: r, error: "Solo tienes " + pfExacto(r.cantidad) + " de " + r.s + "." };
+  if (!isFinite(v) || v <= 0) return { r: r, error: "Pon el precio de venta." };
+  var parte = Math.min(1, q / r.cantidad);
+  var costo = r.inversion * parte;
+  var recibes = q * v;
+  return { r: r, q: q, v: v, parte: parte, costo: costo, recibes: recibes,
+           pnl: recibes - costo, total: parte > 0.9999999 };
+}
+
+function pfExacto(n){
+  if (n == null || !isFinite(n)) return "—";
+  return n.toLocaleString("es-MX", { maximumFractionDigits: 8 });
+}
+
+function pfCResumen(){
+  var d = pfCVenta();
+  if (!d) return;
+  if (d.error){ $("c-resumen").innerHTML = '<p class="muted" style="margin:0">' + esc(d.error) + '</p>'; return; }
+  var cls = d.pnl > 0 ? " pos" : d.pnl < 0 ? " neg" : "";
+  $("c-resumen").innerHTML = '<div class="caja' + cls + '">' +
+    '<div class="ren"><span>Vendes</span><b>' + pfExacto(d.q) + ' de ' + esc(d.r.s) + ' a ' + pfExacto(d.v) + '</b></div>' +
+    '<div class="ren"><span>Recibes</span><b>' + pfUsd(d.recibes) + '</b></div>' +
+    '<div class="ren"><span>Costo de esa parte</span><span>' + pfUsd(d.costo) + '</span></div>' +
+    '<div class="ren"><span>Resultado</span><span>' + pfSign(d.pnl) + ' ' + fmtPct(d.pnl / d.costo) + '</span></div>' +
+    '<p class="avi">' + (d.total
+      ? "Vendes la posicion completa: pasa a cerradas."
+      : "Venta parcial: se cierra esta parte y quedan " + pfExacto(d.r.cantidad - d.q) + " abiertos con " +
+        pfUsd(d.r.inversion - d.costo) + " de costo.") + '</p></div>';
+}
+
+function pfCGuardar(){
+  var d = pfCVenta();
+  if (!d) return;
+  if (d.error){ pfMsg(d.error); pfCResumen(); return; }
+  var r = d.r, fecha = $("c-fecha").value || new Date().toISOString().slice(0,10);
+  var rows;
+  if (d.total){
+    rows = pf.pos.map(function(x){
+      if (x.id !== r.id) return x;
+      var y = Object.assign({}, x);
+      y.estado = "cerrada"; y.cierre = d.v; y.fechaCierre = fecha;
+      return y;
+    });
+  } else {
+    var vendida = Object.assign({}, r, {
+      id: "p" + Date.now(), cantidad: d.q, inversion: d.costo,
+      estado: "cerrada", cierre: d.v, fechaCierre: fecha
+    });
+    rows = pf.pos.map(function(x){
+      if (x.id !== r.id) return x;
+      var y = Object.assign({}, x);
+      y.cantidad = r.cantidad - d.q;
+      y.inversion = r.inversion - d.costo;
+      return y;
+    });
+    rows.push(vendida);
+  }
+  pfCFormHide();
   pfSave(rows);
 }
 
@@ -1790,8 +1881,8 @@ function pfRetro(ce){
 
 $("pf-entrar").addEventListener("click", pfLogin);
 $("pf-pin").addEventListener("keydown", function(e){ if (e.key === "Enter") pfLogin(); });
-$("pf-nueva").addEventListener("click", function(){ pfMFormHide(); pfFormShow(null); });
-$("pf-movnueva").addEventListener("click", function(){ pfFormHide(); pfMFormShow(null); });
+$("pf-nueva").addEventListener("click", function(){ pfMFormHide(); pfCFormHide(); pfFormShow(null); });
+$("pf-movnueva").addEventListener("click", function(){ pfFormHide(); pfCFormHide(); pfMFormShow(null); });
 $("m-guardar").addEventListener("click", pfMFormSave);
 $("m-cancelar").addEventListener("click", pfMFormHide);
 $("m-tipo").addEventListener("change", pfMTipoToggle);
@@ -1804,6 +1895,16 @@ $("pf-rows-mov").addEventListener("click", function(e){
 });
 $("pf-recargar").addEventListener("click", function(){ pfLoad(); });
 $("pf-salir").addEventListener("click", function(){ fetch("/api/portafolio/salir",{method:"POST"}).then(function(){ pf.auth = false; pf.pos = []; pfCierraGrafica(); pfShow(); }); });
+$("c-guardar").addEventListener("click", pfCGuardar);
+$("c-cancelar").addEventListener("click", pfCFormHide);
+$("c-cant").addEventListener("input", pfCResumen);
+$("c-precio").addEventListener("input", pfCResumen);
+$("pf-cform").addEventListener("click", function(e){
+  var r = pf.pos.find(function(x){ return x.id === pf.cerrando; });
+  if (!r) return;
+  if (e.target.closest("#c-todo")){ $("c-cant").value = r.cantidad; pfCResumen(); }
+  else if (e.target.closest("#c-usar")){ var p = pfPx(r); if (p != null){ $("c-precio").value = p; pfCResumen(); } }
+});
 $("f-guardar").addEventListener("click", pfFormSave);
 $("f-cancelar").addEventListener("click", pfFormHide);
 $("f-estado").addEventListener("change", pfEstadoToggle);
