@@ -1271,7 +1271,7 @@ function pfAlerta(ab){
     '<ul>' + malos.map(function(g){
       return '<li><b>' + esc(g.s) + '</b> — ' + g.n + ' compras, ' + pfUsd(g.inv) +
         ' invertidos, promedio ' + fmtPrice(g.inv / g.q) + ', ' +
-        '<span class="chg down">' + pctText(g.pnl / g.inv) + '</span></li>';
+        pfSign(g.pnl) + ' ' + fmtPct(g.pnl / g.inv) + '</li>';
     }).join("") + '</ul></div>';
 }
 
